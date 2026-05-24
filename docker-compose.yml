@@ -27,6 +27,7 @@ services:
       dockerfile: Dockerfile.simple
     image: dlprov-simple
     container_name: treinamento-sem-prov
+    command: python Example/filter-prov.py
     deploy:
       resources:
         limits:

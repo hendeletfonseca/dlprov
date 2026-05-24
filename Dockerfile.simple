@@ -32,4 +32,4 @@ WORKDIR /opt/dlprov
 
 COPY Example-sem-dl-prov/ ./Example/
 
-CMD ["python", "Example/mnist-simple.py"]
+CMD ["python", "Example/filter-prov.py"]
