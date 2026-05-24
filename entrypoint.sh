@@ -16,13 +16,38 @@ monetdb start dataflow_analyzer 2>/dev/null || true
 # echo "Starting Neo4j..."
 # neo4j start &
 
-# Optional: DfAnalyzer (for web UI, not needed during training)
-# echo "Starting DfAnalyzer..."
-# cd /opt/dlprov/DfAnalyzer
-# if [ -f "target/DfAnalyzer-1.0.jar" ]; then
-#     java -jar target/DfAnalyzer-1.0.jar &
-# fi
-# cd /opt/dlprov
+echo "Initializing MonetDB schema..."
+cd /opt/dlprov/DfAnalyzer
+./restore-database.sh || true
+
+echo "Starting DfAnalyzer..."
+JAR_PATH=""
+if ls target/DfAnalyzer-2.0.jar >/dev/null 2>&1; then
+	JAR_PATH="target/DfAnalyzer-2.0.jar"
+elif ls target/DfAnalyzer-1.0.jar >/dev/null 2>&1; then
+	JAR_PATH="target/DfAnalyzer-1.0.jar"
+fi
+
+if [ -n "$JAR_PATH" ]; then
+	java -jar "$JAR_PATH" &
+else
+	echo "DfAnalyzer JAR not found in target/. Download it per README and place it in DfAnalyzer/target."
+	exit 1
+fi
+echo "Waiting for DfAnalyzer to be ready..."
+for i in {1..60}; do
+	if curl -fsS http://localhost:22000/health >/dev/null 2>&1; then
+		echo "DfAnalyzer is up."
+		break
+	fi
+	sleep 1
+done
+
+if ! curl -fsS http://localhost:22000/health >/dev/null 2>&1; then
+	echo "DfAnalyzer did not become ready in time."
+	exit 1
+fi
+cd /opt/dlprov
 
 echo "=== DLProv stack ready ==="
 exec "$@"
