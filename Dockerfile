@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-11-jdk \
     wget \
     curl \
+    git \
     gnupg2 \
     ca-certificates \
     lsb-release \
@@ -26,10 +27,11 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 RUN python -m pip install --upgrade pip
 
 # MonetDB
-RUN wget -qO - https://www.monetdb.org/downloads/MonetDB-GPG-KEY | gpg --dearmor -o /usr/share/keyrings/monetdb.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/monetdb.gpg] https://dev.monetdb.org/downloads/deb/ $(lsb_release -sc) monetdb" > /etc/apt/sources.list.d/monetdb.list \
+RUN wget -qO /tmp/monetdb-repo.deb https://www.monetdb.org/downloads/deb/repo/jammy/monetdb-repo.deb \
+    && dpkg -i /tmp/monetdb-repo.deb \
+    && rm /tmp/monetdb-repo.deb \
     && apt-get update && apt-get install -y --no-install-recommends \
-    monetdbd \
+    monetdb-sql \
     monetdb-client \
     && rm -rf /var/lib/apt/lists/*
 
@@ -52,7 +54,7 @@ RUN pip3 install --no-cache-dir \
     neo4j \
     prov \
     pydot \
-    provdbconnector
+    prov-db-connector
 
 WORKDIR /opt/dlprov
 
@@ -65,7 +67,7 @@ COPY run_df_experiment.sh .
 
 RUN pip3 install --no-cache-dir ./lib-python/
 
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 50000 7474 7687 22000
