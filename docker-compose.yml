@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
   treinamento-com-prov:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: dlprov-full
     container_name: treinamento-com-prov
     command: python Example/filter-prov.py
@@ -25,8 +23,8 @@ services:
 
   treinamento-sem-prov:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile.simple
+      context: .
+      dockerfile: Dockerfile.simple
     image: dlprov-simple
     container_name: treinamento-sem-prov
     deploy:
