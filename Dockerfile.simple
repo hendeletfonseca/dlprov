@@ -21,15 +21,15 @@ RUN python -m pip install --upgrade pip
 
 RUN pip3 install --no-cache-dir \
     tensorflow==2.15.0 \
-    torch==2.2.0 \
-    torchvision==0.17.0 \
     scikit-learn==1.4.0 \
     numpy==1.24.3 \
     Pillow==10.2.0 \
-    matplotlib==3.8.3
+    matplotlib==3.8.3 \
+    psutil
 
 WORKDIR /opt/dlprov
 
 COPY Example-sem-dl-prov/ ./Example/
+COPY monitor.py .
 
 CMD ["python", "Example/filter-prov.py"]

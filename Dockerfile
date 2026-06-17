@@ -35,17 +35,9 @@ RUN wget -qO /tmp/monetdb-repo.deb https://www.monetdb.org/downloads/deb/repo/ja
     monetdb-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Neo4j
-RUN wget -qO - https://debian.neo4j.com/neotechnology.gpg.key | gpg --dearmor -o /usr/share/keyrings/neo4j.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/neo4j.gpg] https://debian.neo4j.com stable 4.1" > /etc/apt/sources.list.d/neo4j.list \
-    && apt-get update && apt-get install -y --no-install-recommends \
-    neo4j=1:4.1.0 \
-    && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir \
     tensorflow==2.15.0 \
-    torch==2.2.0 \
-    torchvision==0.17.0 \
     scikit-learn==1.4.0 \
     numpy==1.24.3 \
     Pillow==10.2.0 \
@@ -54,7 +46,8 @@ RUN pip3 install --no-cache-dir \
     neo4j \
     prov \
     pydot \
-    prov-db-connector
+    prov-db-connector \
+    psutil
 
 WORKDIR /opt/dlprov
 
@@ -67,6 +60,7 @@ COPY run_df_experiment.sh .
 
 RUN pip3 install --no-cache-dir ./lib-python/
 
+COPY monitor.py .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
