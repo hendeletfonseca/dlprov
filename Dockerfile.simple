@@ -31,5 +31,4 @@ WORKDIR /opt/dlprov
 
 COPY Example-sem-dl-prov/ ./Example/
 COPY monitor.py .
-
-CMD ["python", "Example/filter-prov.py"]
+COPY sysmetrics.py .

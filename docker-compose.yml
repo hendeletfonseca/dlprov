@@ -6,7 +6,6 @@ services:
     image: dlprov-full
     container_name: treinamento-com-prov
     profiles: [com-prov]
-    command: python Example/filter-prov.py
     deploy:
       resources:
         limits:
@@ -30,7 +29,6 @@ services:
     image: dlprov-simple
     container_name: treinamento-sem-prov
     profiles: [sem-prov]
-    command: python Example/filter-prov.py
     deploy:
       resources:
         limits:

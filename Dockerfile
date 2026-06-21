@@ -61,10 +61,10 @@ COPY run_df_experiment.sh .
 RUN pip3 install --no-cache-dir ./lib-python/
 
 COPY monitor.py .
+COPY sysmetrics.py .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 50000 7474 7687 22000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["bash"]
