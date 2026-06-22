@@ -27,6 +27,8 @@ RUN pip3 install --no-cache-dir \
     matplotlib==3.8.3 \
     psutil
 
+RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cpu
+
 WORKDIR /opt/dlprov
 
 COPY Example-sem-dl-prov/ ./Example/

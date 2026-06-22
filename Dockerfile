@@ -49,6 +49,8 @@ RUN pip3 install --no-cache-dir \
     prov-db-connector \
     psutil
 
+RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cpu
+
 WORKDIR /opt/dlprov
 
 COPY DfAnalyzer/ ./DfAnalyzer/

@@ -64,7 +64,7 @@ drop = 0.5
 epochs_drop = 10.0
 adaptation_id = 0
 
-t1 = Task(1, dataflow_tag, exec_tag, "TrainingModel")
+t1 = Task(1, df, exec_tag, "TrainingModel")
 
 class LearningRateScheduler(tf.keras.callbacks.Callback):
     """Learning rate scheduler.
@@ -217,7 +217,7 @@ tf1_input = DataSet("iTrainingModel", [Element([opt.get_config()['name'], opt.ge
 t1.add_dataset(tf1_input)
 t1.begin() 
 
-t2 = Task(2, dataflow_tag, exec_tag, "Adaptation", dependency=t1)
+t2 = Task(2, df, exec_tag, "Adaptation", dependency=t1)
   # learning rate schedule
 t2_input = DataSet("iAdaptation", [Element([epochs_drop, drop, initial_lrate])])
 t2.add_dataset(t2_input)
@@ -229,7 +229,7 @@ model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy
 # (5) Train
 model.fit(x_train, y_train, batch_size=32, epochs=epochs, callbacks=[lrate], verbose=1, validation_split=0.2, shuffle=True)
 
-t3 = Task(3, dataflow_tag, exec_tag, "TestingModel", dependency=t1)     
+t3 = Task(3, df, exec_tag, "TestingModel", dependency=t1)     
 t3.begin()                
 
 a = model.evaluate(x_test, y_test)

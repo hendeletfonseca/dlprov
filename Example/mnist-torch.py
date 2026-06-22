@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
+from torchvision.datasets import EMNIST
+
+EMNIST.url = "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import EMNIST
@@ -27,12 +30,12 @@ exec_tag = dataflow_tag + "-" + str(datetime.now())
 df = Dataflow(dataflow_tag, predefined=True)
 df.save()
 
-t1 = Task(1, dataflow_tag, exec_tag, "LoadData")
-t1_1 = Task(2, dataflow_tag, exec_tag, "RandomHorizontal", dependency = t1)
-t1_2 = Task(3, dataflow_tag, exec_tag, "Normalize", dependency = t1_1)
-t2 = Task(4, dataflow_tag, exec_tag, "SplitData", dependency = t1_2)
-t3 = Task(5, dataflow_tag, exec_tag, "Train", dependency = t2)
-t4 = Task(6, dataflow_tag, exec_tag, "Test", dependency = [t2,t3])  
+t1 = Task(1, df, exec_tag, "LoadData")
+t1_1 = Task(2, df, exec_tag, "RandomHorizontal", dependency = t1)
+t1_2 = Task(3, df, exec_tag, "Normalize", dependency = t1_1)
+t2 = Task(4, df, exec_tag, "SplitData", dependency = t1_2)
+t3 = Task(5, df, exec_tag, "Train", dependency = t2)
+t4 = Task(6, df, exec_tag, "Test", dependency = [t2,t3])  
 
 # Define the CNN model
 class CNN(nn.Module):

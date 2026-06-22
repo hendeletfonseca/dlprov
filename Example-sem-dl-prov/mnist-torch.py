@@ -4,6 +4,8 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import EMNIST
+
+EMNIST.url = "https://biometrics.nist.gov/cs_links/EMNIST/gzip.zip"
 import os
 
 class CNN(nn.Module):
