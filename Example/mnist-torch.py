@@ -132,7 +132,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 optimizer_name = optimizer.__class__.__name__
 learning_rate = optimizer.param_groups[0]['lr']  # Get learning rate from optimizer
 num_layers = len(list(model.children()))  # Count the number of layers
-num_epochs = 2
+num_epochs = 10
 batch_size = 64
 
 tf3_input = DataSet("iTrain", [Element([optimizer_name, learning_rate, num_epochs, batch_size, num_layers])])

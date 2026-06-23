@@ -42,7 +42,7 @@ def evaluate_model(trained_path, data):
     return test_acc
 
 def main():
-    epochs = 2
+    epochs = 10
     data = load_data()
     trained_model_path = train_model(data, epochs)
     test_accuracy = evaluate_model(trained_model_path, data)
