@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - dlprov</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 24px; }
+h1 { font-size: 1.8rem; margin-bottom: 8px; color: #f8fafc; }
+.subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+.card h3 { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.card .value { font-size: 1.8rem; font-weight: 700; color: #38bdf8; }
+.card .detail { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.chart-box { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
+.chart-box h3 { font-size: 0.95rem; margin-bottom: 12px; color: #f1f5f9; }
+.chart-box canvas { width: 100% !important; height: 300px !important; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #334155; }
+th { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+td { color: #e2e8f0; }
+tr:hover td { background: #1e293b; }
+footer { text-align: center; color: #475569; font-size: 0.8rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<h1>Dashboard dlprov</h1>
+<p class="subtitle">Comparação entre proveniência computacional e semântica &mdash; 8 CPUs, 19.3GB RAM (host) · 4 CPUs, 16GB RAM (container)</p>
+
+<div class="cards" id="cards"></div>
+
+<div class="chart-grid">
+  <div class="chart-box"><h3>Tempo total médio por experimento</h3><canvas id="chart-total"></canvas></div>
+  <div class="chart-box"><h3>CPU por época (média entre runs)</h3><canvas id="chart-cpu"></canvas></div>
+  <div class="chart-box"><h3>RAM por época (média entre runs)</h3><canvas id="chart-ram"></canvas></div>
+  <div class="chart-box">
+    <h3>Tempo por run</h3>
+    <div style="margin-bottom:12px">
+      <label style="color:#94a3b8;font-size:0.85rem">Experimento: </label>
+      <select id="expSelect" style="background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:6px 10px;font-size:0.9rem"><option value="alexnet_dnnprov-com-prov" selected>AlexNet (Computacional)</option>
+<option value="alexnet_dnnprov-sem-prov">AlexNet (Semântica)</option>
+<option value="mnist-simple-com-prov">MNIST Simple (Computacional)</option>
+<option value="mnist-simple-sem-prov">MNIST Simple (Semântica)</option>
+<option value="mnist-torch-com-prov">MNIST Torch (Computacional)</option>
+<option value="mnist-torch-sem-prov">MNIST Torch (Semântica)</option></select>
+    </div>
+    <canvas id="chart-run"></canvas>
+  </div>
+</div>
+
+<div class="chart-box" style="margin-bottom:32px">
+  <h3>Todas as execuções — tempo total (s)</h3>
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>Experimento</th><th>Run 1</th><th>Run 2</th><th>Run 3</th><th>Run 4</th><th>Run 5</th><th>Média</th><th>Desv. Pad.</th></tr></thead>
+    <tbody id="table-body"></tbody>
+  </table></div>
+</div>
+
+<footer>Gerado por dashboard.py</footer>
+
+<script>
+const DATA = {"alexnet_dnnprov-com-prov": {"label": "AlexNet (Computacional)", "model": "AlexNet", "prov": "Computacional", "totals": [1331.99, 1342.32, 1325.46, 1350.8, 1331.19], "run_numbers": [1, 2, 3, 4, 5], "mean": 1336.35, "stdev": 10.11}, "alexnet_dnnprov-sem-prov": {"label": "AlexNet (Sem\u00e2ntica)", "model": "AlexNet", "prov": "Sem\u00e2ntica", "totals": [1293.77, 1275.82, 1273.28, 1303.01, 1269.83], "run_numbers": [1, 2, 3, 4, 5], "mean": 1283.14, "stdev": 14.45}, "mnist-simple-com-prov": {"label": "MNIST Simple (Computacional)", "model": "MNIST Simple", "prov": "Computacional", "totals": [27.12, 20.37, 17.36, 20.53, 26.66], "run_numbers": [1, 2, 3, 4, 5], "mean": 22.41, "stdev": 4.29}, "mnist-simple-sem-prov": {"label": "MNIST Simple (Sem\u00e2ntica)", "model": "MNIST Simple", "prov": "Sem\u00e2ntica", "totals": [25.11, 11.29, 11.48, 11.72, 11.5], "run_numbers": [1, 2, 3, 4, 5], "mean": 14.22, "stdev": 6.09}, "mnist-torch-com-prov": {"label": "MNIST Torch (Computacional)", "model": "MNIST Torch", "prov": "Computacional", "totals": [213.39, 244.12, 188.06, 236.54, 192.25], "run_numbers": [1, 2, 3, 4, 5], "mean": 214.87, "stdev": 25.29}, "mnist-torch-sem-prov": {"label": "MNIST Torch (Sem\u00e2ntica)", "model": "MNIST Torch", "prov": "Sem\u00e2ntica", "totals": [190.68, 135.9, 134.9, 159.87, 166.73], "run_numbers": [1, 2, 3, 4, 5], "mean": 157.62, "stdev": 23.29}};
+const EPOCHS = {"alexnet_dnnprov-com-prov": [{"epoch": 0, "cpu": 162.4, "ram": 1409.0}, {"epoch": 1, "cpu": 351.9, "ram": 5764.3}, {"epoch": 2, "cpu": 350.4, "ram": 6162.2}, {"epoch": 3, "cpu": 351.9, "ram": 6211.5}, {"epoch": 4, "cpu": 352.7, "ram": 6436.1}, {"epoch": 5, "cpu": 348.0, "ram": 6460.6}, {"epoch": 6, "cpu": 348.8, "ram": 6504.5}, {"epoch": 7, "cpu": 351.2, "ram": 6511.5}, {"epoch": 8, "cpu": 351.2, "ram": 6512.5}, {"epoch": 9, "cpu": 350.4, "ram": 6513.8}, {"epoch": 10, "cpu": 343.5, "ram": 6472.3}], "alexnet_dnnprov-sem-prov": [{"epoch": 0, "cpu": 43.0, "ram": 475.9}, {"epoch": 1, "cpu": 295.4, "ram": 4724.9}, {"epoch": 2, "cpu": 302.3, "ram": 5035.4}, {"epoch": 3, "cpu": 301.2, "ram": 5090.2}, {"epoch": 4, "cpu": 302.4, "ram": 5110.6}, {"epoch": 5, "cpu": 303.0, "ram": 5122.3}, {"epoch": 6, "cpu": 304.0, "ram": 5130.1}, {"epoch": 7, "cpu": 303.6, "ram": 5131.7}, {"epoch": 8, "cpu": 306.5, "ram": 5133.4}, {"epoch": 9, "cpu": 307.9, "ram": 5136.9}, {"epoch": 10, "cpu": 296.0, "ram": 5097.5}], "mnist-simple-com-prov": [{"epoch": 0, "cpu": 192.8, "ram": 1259.6}, {"epoch": 1, "cpu": 278.7, "ram": 1723.4}, {"epoch": 2, "cpu": 251.0, "ram": 1595.3}], "mnist-simple-sem-prov": [{"epoch": 0, "cpu": 84.3, "ram": 278.0}, {"epoch": 1, "cpu": 182.7, "ram": 894.9}, {"epoch": 2, "cpu": 149.3, "ram": 754.3}], "mnist-torch-com-prov": [{"epoch": 0, "cpu": 289.3, "ram": 2831.1}], "mnist-torch-sem-prov": [{"epoch": 0, "cpu": 212.7, "ram": 1684.0}]};
+
+// ---- Cards ----
+const cardsDiv = document.getElementById('cards');
+for (const key of Object.keys(DATA).sort()) {
+  const d = DATA[key];
+  const runLabels = d.run_numbers.map(r => `Run ${r}: ${d.totals[d.run_numbers.indexOf(r)]}s`).join(' &middot; ');
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h3>${d.label}</h3><div class="value">${d.mean}s</div><div class="detail">±${d.stdev}s &middot; ${d.totals.length} runs &middot; ${runLabels}</div>`;
+  cardsDiv.appendChild(card);
+}
+
+// ---- Table ----
+const tbody = document.getElementById('table-body');
+const allRunNums = [1, 2, 3, 4, 5];
+for (const key of Object.keys(DATA).sort()) {
+  const d = DATA[key];
+  const byRun = {};
+  d.run_numbers.forEach((rn, i) => { byRun[rn] = d.totals[i]; });
+  const tr = document.createElement('tr');
+  let cells = `<td>${d.label}</td>`;
+  for (const rn of allRunNums) {
+    cells += `<td>${byRun[rn] !== undefined ? byRun[rn] + 's' : '—'}</td>`;
+  }
+  cells += `<td><strong>${d.mean}s</strong></td><td>±${d.stdev}s</td>`;
+  tr.innerHTML = cells;
+  tbody.appendChild(tr);
+}
+
+// ---- Chart: Total Time ----
+const models = ["MNIST Simple", "MNIST Torch", "AlexNet"];
+const provTypes = ["Computacional", "Sem\u00e2ntica"];
+function buildTotalChart() {
+  const labels = [];
+  const comData = [];
+  const semData = [];
+  for (const m of models) {
+    let com = null, sem = null;
+    for (const key of Object.keys(DATA)) {
+      const d = DATA[key];
+      if (d.model === m && d.prov === 'Computacional') com = d.mean;
+      if (d.model === m && d.prov === 'Semântica') sem = d.mean;
+    }
+    labels.push(m);
+    comData.push(com);
+    semData.push(sem);
+  }
+  return { labels, comData, semData };
+}
+const tc = buildTotalChart();
+new Chart(document.getElementById('chart-total'), {
+  type: 'bar',
+  data: {
+    labels: tc.labels,
+    datasets: [
+      { label: 'Computacional', data: tc.comData, backgroundColor: '#3b82f6', borderRadius: 6 },
+      { label: 'Semântica', data: tc.semData, backgroundColor: '#10b981', borderRadius: 6 },
+    ],
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#94a3b8' } } },
+    scales: {
+      x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+      y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, beginAtZero: true, title: { display: true, text: 'Segundos', color: '#94a3b8' } },
+    },
+  },
+});
+
+// ---- CPU / RAM line charts (all experiments) ----
+const COLORS = [
+  '#3b82f6', '#10b981', '#f59e0b',
+  '#ef4444', '#8b5cf6', '#ec4899',
+];
+
+function buildAllEpochChart(metric) {
+  const labelsSet = new Set();
+  const expEntries = [];
+  for (const key of Object.keys(DATA).sort()) {
+    const d = EPOCHS[key] || [];
+    if (d.length === 0) continue;
+    d.forEach(e => labelsSet.add(e.epoch));
+    expEntries.push({ key, data: d });
+  }
+  const labels = Array.from(labelsSet).sort((a, b) => a - b);
+  const datasets = expEntries.map((entry, i) => ({
+    label: DATA[entry.key].label,
+    data: labels.map(ep => {
+      const found = entry.data.find(e => e.epoch === ep);
+      return found ? found[metric] : null;
+    }),
+    borderColor: COLORS[i % COLORS.length],
+    backgroundColor: 'transparent',
+    tension: 0.3,
+    pointRadius: 3,
+    spanGaps: true,
+  }));
+  return { labels, datasets };
+}
+
+let cpuChart = new Chart(document.getElementById('chart-cpu'), {
+  type: 'line',
+  data: buildAllEpochChart('cpu'),
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, title: { display: true, text: 'Época', color: '#94a3b8' } },
+      y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, title: { display: true, text: 'CPU (%)', color: '#94a3b8' } },
+    },
+  },
+});
+
+let ramChart = new Chart(document.getElementById('chart-ram'), {
+  type: 'line',
+  data: buildAllEpochChart('ram'),
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, title: { display: true, text: 'Época', color: '#94a3b8' } },
+      y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, title: { display: true, text: 'RAM (MB)', color: '#94a3b8' } },
+    },
+  },
+});
+
+// ---- Per-run bar chart ----
+let runChart = null;
+function updateRunChart() {
+  const expKey = document.getElementById('expSelect').value;
+  const d = DATA[expKey];
+  if (!d) return;
+  const labels = d.run_numbers.map(r => `Run ${r}`);
+  if (runChart) runChart.destroy();
+  runChart = new Chart(document.getElementById('chart-run'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: d.label, data: d.totals, backgroundColor: '#3b82f6', borderRadius: 4 }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, beginAtZero: true, title: { display: true, text: 'Segundos', color: '#94a3b8' } },
+      },
+    },
+  });
+}
+
+document.getElementById('expSelect').addEventListener('change', updateRunChart);
+updateRunChart();
+</script>
+</body>
+</html>

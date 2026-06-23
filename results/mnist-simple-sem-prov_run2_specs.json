@@ -1,0 +1,7 @@
+{
+  "host_cpu_cores": 8,
+  "host_ram_gb": 19.3,
+  "container_cpu_limit_cores": 4.0,
+  "container_ram_limit_gb": 16.0,
+  "cpu_metric": "percentual de 1 core (ex: 200% = 2 cores)"
+}

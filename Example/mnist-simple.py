@@ -147,10 +147,10 @@ def main():
 
     exec_tag = dataflow_tag + "-" + str(datetime.now())        
 
-    t1 = Task(1, dataflow_tag, exec_tag, "LoadData")
-    t2 = Task(2, dataflow_tag, exec_tag, "SplitData", dependency = t1)
-    t3 = Task(3, dataflow_tag, exec_tag, "TrainModel", dependency = t2)
-    t4 = Task(4, dataflow_tag, exec_tag, "TestModel", dependency = [t2,t3])         
+    t1 = Task(1, df, exec_tag, "LoadData")
+    t2 = Task(2, df, exec_tag, "SplitData", dependency = t1)
+    t3 = Task(3, df, exec_tag, "TrainModel", dependency = t2)
+    t4 = Task(4, df, exec_tag, "TestModel", dependency = [t2,t3])         
     
     data = load_data(t1, t2, dataflow_tag, exec_tag, "mnist")
     trained_model_path = train_model(t3, dataflow_tag, exec_tag, data, epochs)

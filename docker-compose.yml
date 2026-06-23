@@ -1,0 +1,60 @@
+services:
+  treinamento-com-prov:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dlprov-full
+    container_name: treinamento-com-prov
+    profiles: [com-prov]
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 16G
+        reservations:
+          cpus: "2"
+          memory: 4G
+    volumes:
+      - ./results:/opt/dlprov/results
+    ports:
+      - 50000:50000
+      - 22000:22000
+    stdin_open: true
+    tty: true
+
+  treinamento-sem-prov:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    image: dlprov-simple
+    container_name: treinamento-sem-prov
+    profiles: [sem-prov]
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 16G
+        reservations:
+          cpus: "2"
+          memory: 4G
+    volumes:
+      - ./results:/opt/dlprov/results
+    stdin_open: true
+    tty: true
+
+  neo4j:
+    image: neo4j:4.1
+    container_name: dlprov-neo4j
+    profiles: [analysis]
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jneo4j
+      - NEO4J_dbms_default__listen__address=0.0.0.0
+      - NEO4J_dbms_connector_http_listen__address=0.0.0.0
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  neo4j_data:

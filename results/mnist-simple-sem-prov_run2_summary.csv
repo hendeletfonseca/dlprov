@@ -1,0 +1,6 @@
+# container: cpu_percent = % de 1 core, ram_mb = cgroup. host: host_cpu_percent = % total, host_ram_mb = /proc/meminfo
+# host specs: 8 CPUs, 19.3GB RAM | container limit: 4.0 CPUs, 16.0GB RAM
+epoch,mean_cpu,max_cpu,mean_ram_mb,max_ram_mb,mean_host_cpu,max_host_cpu,mean_host_ram_mb,max_host_ram_mb,samples
+0,89.42,164.49,281.4,622.6,8.28,20.1,1961.8,2295.9,4
+1,189.68,216.09,809.7,810.5,25.8,29.9,2473.9,2480.3,3
+2,159.14,216.59,609.5,855.5,22.16,33.5,2265.5,2511.7,5
